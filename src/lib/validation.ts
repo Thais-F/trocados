@@ -13,3 +13,13 @@ export const loginSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+
+export const transactionSchema = z.object({
+  type: z.enum(["INCOME", "EXPENSE"]),
+  amount: z.coerce.number().positive("Valor deve ser maior que zero"),
+  category: z.string().trim().min(1, "Categoria obrigatória").max(50),
+  description: z.string().trim().max(280).optional().or(z.literal("")),
+  date: z.coerce.date(),
+});
+
+export type TransactionInput = z.infer<typeof transactionSchema>;
