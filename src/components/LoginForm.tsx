@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
+const inputClass =
+  "rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25";
+
 export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -33,9 +36,9 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium">
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="email" className="text-sm font-medium text-foreground/90">
           Email
         </label>
         <input
@@ -44,12 +47,12 @@ export function LoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+          className={inputClass}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="password" className="text-sm font-medium text-foreground/90">
           Senha
         </label>
         <input
@@ -58,16 +61,16 @@ export function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+          className={inputClass}
         />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <button
         type="submit"
         disabled={loading}
-        className="rounded bg-zinc-900 px-4 py-2 font-medium text-white disabled:opacity-50 dark:bg-white dark:text-zinc-900"
+        className="mt-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Entrando..." : "Entrar"}
       </button>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Transaction } from "@/generated/prisma/client";
 import { TransactionForm } from "./TransactionForm";
 import { TransactionList } from "./TransactionList";
+import { ArrowDownIcon, ArrowUpIcon, WalletIcon } from "./icons";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -36,32 +37,47 @@ export function TransactionsPanel() {
   const balance = income - expense;
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-6">
-      <div className="grid grid-cols-3 gap-3 text-center">
-        <div className="rounded border border-zinc-200 p-3 dark:border-zinc-800">
-          <p className="text-xs text-zinc-500">Receitas</p>
-          <p className="font-semibold text-green-600">{currency.format(income)}</p>
+    <div className="flex w-full flex-col gap-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success/15 text-success">
+            <ArrowUpIcon className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="text-xs text-muted">Receitas</p>
+            <p className="font-semibold text-success">{currency.format(income)}</p>
+          </div>
         </div>
-        <div className="rounded border border-zinc-200 p-3 dark:border-zinc-800">
-          <p className="text-xs text-zinc-500">Despesas</p>
-          <p className="font-semibold text-red-600">{currency.format(expense)}</p>
+
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-danger/15 text-danger">
+            <ArrowDownIcon className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="text-xs text-muted">Despesas</p>
+            <p className="font-semibold text-danger">{currency.format(expense)}</p>
+          </div>
         </div>
-        <div className="rounded border border-zinc-200 p-3 dark:border-zinc-800">
-          <p className="text-xs text-zinc-500">Saldo</p>
-          <p
-            className={`font-semibold ${
-              balance >= 0 ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {currency.format(balance)}
-          </p>
+
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            <WalletIcon className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="text-xs text-muted">Saldo</p>
+            <p
+              className={`font-semibold ${balance >= 0 ? "text-success" : "text-danger"}`}
+            >
+              {currency.format(balance)}
+            </p>
+          </div>
         </div>
       </div>
 
       <TransactionForm onSaved={load} />
 
       {loading ? (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">Carregando...</p>
+        <p className="text-sm text-muted">Carregando...</p>
       ) : (
         <TransactionList transactions={transactions} onChanged={load} />
       )}

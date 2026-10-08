@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Transaction } from "@/generated/prisma/client";
 import { TransactionForm } from "./TransactionForm";
+import { ArrowDownIcon, ArrowUpIcon, PencilIcon, TrashIcon } from "./icons";
 
 type Props = {
   transactions: Transaction[];
@@ -32,7 +33,7 @@ export function TransactionList({ transactions, onChanged }: Props) {
 
   if (transactions.length === 0) {
     return (
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="rounded-2xl border border-dashed border-border px-5 py-8 text-center text-sm text-muted">
         Nenhuma transação cadastrada ainda.
       </p>
     );
@@ -43,7 +44,7 @@ export function TransactionList({ transactions, onChanged }: Props) {
       {transactions.map((t) => (
         <li
           key={t.id}
-          className="rounded border border-zinc-200 p-3 dark:border-zinc-800"
+          className="rounded-2xl border border-border bg-surface p-4"
         >
           {editingId === t.id ? (
             <TransactionForm
@@ -56,21 +57,34 @@ export function TransactionList({ transactions, onChanged }: Props) {
             />
           ) : (
             <div className="flex items-center justify-between gap-3">
-              <div className="flex flex-col">
-                <span className="font-medium">{t.category}</span>
-                {t.description && (
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {t.description}
-                  </span>
-                )}
-                <span className="text-xs text-zinc-500">
-                  {dateFormat.format(new Date(t.date))}
-                </span>
-              </div>
               <div className="flex items-center gap-3">
                 <span
-                  className={`font-semibold ${
-                    t.type === "INCOME" ? "text-green-600" : "text-red-600"
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                    t.type === "INCOME"
+                      ? "bg-success/15 text-success"
+                      : "bg-danger/15 text-danger"
+                  }`}
+                >
+                  {t.type === "INCOME" ? (
+                    <ArrowUpIcon className="h-4 w-4" />
+                  ) : (
+                    <ArrowDownIcon className="h-4 w-4" />
+                  )}
+                </span>
+                <div className="flex flex-col">
+                  <span className="font-medium">{t.category}</span>
+                  {t.description && (
+                    <span className="text-sm text-muted">{t.description}</span>
+                  )}
+                  <span className="text-xs text-muted/80">
+                    {dateFormat.format(new Date(t.date))}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <span
+                  className={`mr-1 font-semibold ${
+                    t.type === "INCOME" ? "text-success" : "text-danger"
                   }`}
                 >
                   {t.type === "INCOME" ? "+" : "-"}
@@ -78,16 +92,18 @@ export function TransactionList({ transactions, onChanged }: Props) {
                 </span>
                 <button
                   onClick={() => setEditingId(t.id)}
-                  className="text-sm font-medium underline"
+                  aria-label="Editar"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-surface-hover hover:text-foreground"
                 >
-                  Editar
+                  <PencilIcon className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => handleDelete(t.id)}
                   disabled={deletingId === t.id}
-                  className="text-sm font-medium text-red-600 underline disabled:opacity-50"
+                  aria-label="Excluir"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-danger/15 hover:text-danger disabled:opacity-50"
                 >
-                  {deletingId === t.id ? "Excluindo..." : "Excluir"}
+                  <TrashIcon className="h-4 w-4" />
                 </button>
               </div>
             </div>
