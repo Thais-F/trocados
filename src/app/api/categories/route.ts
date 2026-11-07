@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { categorySchema } from "@/lib/validation";
+import { isForeignKeyError } from "@/lib/prisma-errors";
 
 export async function GET() {
   const session = await auth();
@@ -44,9 +45,18 @@ export async function POST(req: Request) {
     );
   }
 
-  const category = await prisma.category.create({
-    data: { userId: session.user.id, name, color },
-  });
-
-  return NextResponse.json({ category }, { status: 201 });
+  try {
+    const category = await prisma.category.create({
+      data: { userId: session.user.id, name, color },
+    });
+    return NextResponse.json({ category }, { status: 201 });
+  } catch (error) {
+    if (isForeignKeyError(error)) {
+      return NextResponse.json(
+        { error: "Sessão inválida. Faça login novamente." },
+        { status: 401 }
+      );
+    }
+    throw error;
+  }
 }

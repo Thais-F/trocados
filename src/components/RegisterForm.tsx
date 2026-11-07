@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { readErrorMessage } from "@/lib/api";
 
 const inputClass =
   "rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25";
@@ -27,8 +28,7 @@ export function RegisterForm() {
     });
 
     if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "Erro ao cadastrar.");
+      setError(await readErrorMessage(res, "Erro ao cadastrar."));
       setLoading(false);
       return;
     }

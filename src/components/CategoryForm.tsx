@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Category } from "@/generated/prisma/client";
 import { CATEGORY_COLORS } from "@/lib/colors";
+import { readErrorMessage } from "@/lib/api";
 import { ColorSwatchPicker } from "./ColorSwatchPicker";
 
 type Props = {
@@ -38,8 +39,7 @@ export function CategoryForm({ category, onSaved, onCancel }: Props) {
     setLoading(false);
 
     if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "Erro ao salvar.");
+      setError(await readErrorMessage(res, "Erro ao salvar."));
       return;
     }
 

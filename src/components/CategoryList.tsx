@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Category } from "@/generated/prisma/client";
 import { CategoryForm } from "./CategoryForm";
 import { PencilIcon, TrashIcon } from "./icons";
+import { readErrorMessage } from "@/lib/api";
 
 type Props = {
   categories: Category[];
@@ -24,8 +25,7 @@ export function CategoryList({ categories, onChanged }: Props) {
     setDeletingId(null);
 
     if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "Erro ao excluir.");
+      setError(await readErrorMessage(res, "Erro ao excluir."));
       return;
     }
 

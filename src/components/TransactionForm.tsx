@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Category } from "@/generated/prisma/client";
 import type { TransactionWithCategory } from "@/lib/types";
+import { useFetchList } from "@/lib/useFetchList";
+import { readErrorMessage } from "@/lib/api";
+import { ErrorRetry, LoadingSkeleton } from "./StateCard";
 
 type Props = {
   transaction?: TransactionWithCategory;
@@ -22,8 +25,12 @@ function toDateInputValue(date: Date | string) {
 
 export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
   const isEditing = !!transaction;
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const {
+    data: categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+    reload: reloadCategories,
+  } = useFetchList<Category>("/api/categories", "categories");
   const [type, setType] = useState<"INCOME" | "EXPENSE">(
     transaction?.type ?? "EXPENSE"
   );
@@ -40,15 +47,7 @@ export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/categories")
-      .then((res) => res.json())
-      .then((data) => {
-        setCategories(data.categories ?? []);
-        setCategoryId((current) => current || data.categories?.[0]?.id || "");
-      })
-      .finally(() => setCategoriesLoading(false));
-  }, []);
+  const selectedCategoryId = categoryId || categories[0]?.id || "";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,14 +62,19 @@ export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, amount, categoryId, description, date }),
+      body: JSON.stringify({
+        type,
+        amount,
+        categoryId: selectedCategoryId,
+        description,
+        date,
+      }),
     });
 
     setLoading(false);
 
     if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "Erro ao salvar.");
+      setError(await readErrorMessage(res, "Erro ao salvar."));
       return;
     }
 
@@ -82,7 +86,15 @@ export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
     onSaved();
   }
 
-  if (!categoriesLoading && categories.length === 0) {
+  if (categoriesLoading) {
+    return <LoadingSkeleton />;
+  }
+
+  if (categoriesError) {
+    return <ErrorRetry message={categoriesError} onRetry={reloadCategories} />;
+  }
+
+  if (categories.length === 0) {
     return (
       <div className="flex w-full flex-col items-center gap-3 rounded-2xl border border-dashed border-border p-6 text-center">
         <p className="text-sm text-muted">
@@ -167,7 +179,7 @@ export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
         <select
           id="category"
           required
-          value={categoryId}
+          value={selectedCategoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           className={inputClass}
         >

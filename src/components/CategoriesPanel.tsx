@@ -1,35 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import type { Category } from "@/generated/prisma/client";
+import { useFetchList } from "@/lib/useFetchList";
 import { CategoryForm } from "./CategoryForm";
 import { CategoryList } from "./CategoryList";
+import { ErrorRetry, LoadingSkeleton } from "./StateCard";
 
 export function CategoriesPanel() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const load = useCallback(async () => {
-    const res = await fetch("/api/categories");
-    if (res.ok) {
-      const data = await res.json();
-      setCategories(data.categories);
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const { data: categories, loading, error, reload } = useFetchList<Category>(
+    "/api/categories",
+    "categories"
+  );
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <CategoryForm onSaved={load} />
+      <CategoryForm onSaved={reload} />
 
       {loading ? (
-        <p className="text-sm text-muted">Carregando...</p>
+        <LoadingSkeleton />
+      ) : error ? (
+        <ErrorRetry message={error} onRetry={reload} />
       ) : (
-        <CategoryList categories={categories} onChanged={load} />
+        <CategoryList categories={categories} onChanged={reload} />
       )}
     </div>
   );

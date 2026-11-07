@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import type { TransactionWithCategory } from "@/lib/types";
+import { useFetchList } from "@/lib/useFetchList";
 import { TransactionForm } from "./TransactionForm";
 import { TransactionList } from "./TransactionList";
 import { ArrowDownIcon, ArrowUpIcon, WalletIcon } from "./icons";
+import { ErrorRetry, LoadingSkeleton } from "./StateCard";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -12,21 +13,12 @@ const currency = new Intl.NumberFormat("pt-BR", {
 });
 
 export function TransactionsPanel() {
-  const [transactions, setTransactions] = useState<TransactionWithCategory[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const load = useCallback(async () => {
-    const res = await fetch("/api/transactions");
-    if (res.ok) {
-      const data = await res.json();
-      setTransactions(data.transactions);
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const {
+    data: transactions,
+    loading,
+    error,
+    reload,
+  } = useFetchList<TransactionWithCategory>("/api/transactions", "transactions");
 
   const income = transactions
     .filter((t) => t.type === "INCOME")
@@ -74,12 +66,14 @@ export function TransactionsPanel() {
         </div>
       </div>
 
-      <TransactionForm onSaved={load} />
+      <TransactionForm onSaved={reload} />
 
       {loading ? (
-        <p className="text-sm text-muted">Carregando...</p>
+        <LoadingSkeleton />
+      ) : error ? (
+        <ErrorRetry message={error} onRetry={reload} />
       ) : (
-        <TransactionList transactions={transactions} onChanged={load} />
+        <TransactionList transactions={transactions} onChanged={reload} />
       )}
     </div>
   );
