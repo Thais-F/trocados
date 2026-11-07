@@ -4,9 +4,13 @@ import { authConfig } from "@/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
+const PROTECTED_PREFIXES = ["/dashboard", "/categories"];
+
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
-  const isProtected = req.nextUrl.pathname.startsWith("/dashboard");
+  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
+    req.nextUrl.pathname.startsWith(prefix)
+  );
 
   if (isProtected && !isLoggedIn) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
@@ -15,5 +19,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/categories/:path*"],
 };

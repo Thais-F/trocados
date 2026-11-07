@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validation";
+import { DEFAULT_CATEGORIES } from "@/lib/colors";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -25,7 +26,12 @@ export async function POST(req: Request) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { name, email, hashedPassword },
+    data: {
+      name,
+      email,
+      hashedPassword,
+      categories: { create: DEFAULT_CATEGORIES },
+    },
     select: { id: true, name: true, email: true },
   });
 

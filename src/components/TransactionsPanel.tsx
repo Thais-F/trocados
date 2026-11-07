@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Transaction } from "@/generated/prisma/client";
+import type { TransactionWithCategory } from "@/lib/types";
 import { TransactionForm } from "./TransactionForm";
 import { TransactionList } from "./TransactionList";
 import { ArrowDownIcon, ArrowUpIcon, WalletIcon } from "./icons";
@@ -12,7 +12,7 @@ const currency = new Intl.NumberFormat("pt-BR", {
 });
 
 export function TransactionsPanel() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<TransactionWithCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {

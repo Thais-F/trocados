@@ -33,11 +33,17 @@ export async function PATCH(
     );
   }
 
-  const { type, amount, category, description, date } = parsed.data;
+  const { type, amount, categoryId, description, date } = parsed.data;
+
+  const category = await prisma.category.findUnique({ where: { id: categoryId } });
+  if (!category || category.userId !== session.user.id) {
+    return NextResponse.json({ error: "Categoria inválida." }, { status: 400 });
+  }
 
   const transaction = await prisma.transaction.update({
     where: { id },
-    data: { type, amount, category, description: description || null, date },
+    data: { type, amount, categoryId, description: description || null, date },
+    include: { category: true },
   });
 
   return NextResponse.json({ transaction });

@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import type { Transaction } from "@/generated/prisma/client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import type { Category } from "@/generated/prisma/client";
+import type { TransactionWithCategory } from "@/lib/types";
 
 type Props = {
-  transaction?: Transaction;
+  transaction?: TransactionWithCategory;
   onSaved: () => void;
   onCancel?: () => void;
 };
@@ -20,13 +22,15 @@ function toDateInputValue(date: Date | string) {
 
 export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
   const isEditing = !!transaction;
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [type, setType] = useState<"INCOME" | "EXPENSE">(
     transaction?.type ?? "EXPENSE"
   );
   const [amount, setAmount] = useState(
     transaction ? String(transaction.amount) : ""
   );
-  const [category, setCategory] = useState(transaction?.category ?? "");
+  const [categoryId, setCategoryId] = useState(transaction?.categoryId ?? "");
   const [description, setDescription] = useState(
     transaction?.description ?? ""
   );
@@ -35,6 +39,16 @@ export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
   );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        setCategories(data.categories ?? []);
+        setCategoryId((current) => current || data.categories?.[0]?.id || "");
+      })
+      .finally(() => setCategoriesLoading(false));
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,7 +63,7 @@ export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, amount, category, description, date }),
+      body: JSON.stringify({ type, amount, categoryId, description, date }),
     });
 
     setLoading(false);
@@ -62,11 +76,26 @@ export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
 
     if (!isEditing) {
       setAmount("");
-      setCategory("");
       setDescription("");
     }
 
     onSaved();
+  }
+
+  if (!categoriesLoading && categories.length === 0) {
+    return (
+      <div className="flex w-full flex-col items-center gap-3 rounded-2xl border border-dashed border-border p-6 text-center">
+        <p className="text-sm text-muted">
+          Você ainda não tem nenhuma categoria. Crie uma antes de lançar uma transação.
+        </p>
+        <Link
+          href="/categories"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover"
+        >
+          Criar categoria
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -135,15 +164,19 @@ export function TransactionForm({ transaction, onSaved, onCancel }: Props) {
         <label htmlFor="category" className={labelClass}>
           Categoria
         </label>
-        <input
+        <select
           id="category"
-          type="text"
           required
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="Mercado, transporte, salário..."
-          className={`${inputClass} placeholder:text-muted/60`}
-        />
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+          className={inputClass}
+        >
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="flex flex-col gap-1.5">

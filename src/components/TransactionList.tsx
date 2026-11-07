@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import type { Transaction } from "@/generated/prisma/client";
+import type { TransactionWithCategory } from "@/lib/types";
 import { TransactionForm } from "./TransactionForm";
 import { ArrowDownIcon, ArrowUpIcon, PencilIcon, TrashIcon } from "./icons";
 
 type Props = {
-  transactions: Transaction[];
+  transactions: TransactionWithCategory[];
   onChanged: () => void;
 };
 
@@ -59,11 +59,11 @@ export function TransactionList({ transactions, onChanged }: Props) {
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                    t.type === "INCOME"
-                      ? "bg-success/15 text-success"
-                      : "bg-danger/15 text-danger"
-                  }`}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor: `${t.category.color}26`,
+                    color: t.category.color,
+                  }}
                 >
                   {t.type === "INCOME" ? (
                     <ArrowUpIcon className="h-4 w-4" />
@@ -72,7 +72,7 @@ export function TransactionList({ transactions, onChanged }: Props) {
                   )}
                 </span>
                 <div className="flex flex-col">
-                  <span className="font-medium">{t.category}</span>
+                  <span className="font-medium">{t.category.name}</span>
                   {t.description && (
                     <span className="text-sm text-muted">{t.description}</span>
                   )}
