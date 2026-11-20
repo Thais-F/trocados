@@ -4,13 +4,8 @@ import type { TransactionWithCategory } from "@/lib/types";
 import { useFetchList } from "@/lib/useFetchList";
 import { TransactionForm } from "./TransactionForm";
 import { TransactionList } from "./TransactionList";
-import { ArrowDownIcon, ArrowUpIcon, WalletIcon } from "./icons";
+import { IndicatorCards } from "./IndicatorCards";
 import { ErrorRetry, LoadingSkeleton } from "./StateCard";
-
-const currency = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
 
 export function TransactionsPanel() {
   const {
@@ -30,41 +25,7 @@ export function TransactionsPanel() {
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success/15 text-success">
-            <ArrowUpIcon className="h-4 w-4" />
-          </span>
-          <div>
-            <p className="text-xs text-muted">Receitas</p>
-            <p className="font-semibold text-success">{currency.format(income)}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-danger/15 text-danger">
-            <ArrowDownIcon className="h-4 w-4" />
-          </span>
-          <div>
-            <p className="text-xs text-muted">Despesas</p>
-            <p className="font-semibold text-danger">{currency.format(expense)}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
-            <WalletIcon className="h-4 w-4" />
-          </span>
-          <div>
-            <p className="text-xs text-muted">Saldo</p>
-            <p
-              className={`font-semibold ${balance >= 0 ? "text-success" : "text-danger"}`}
-            >
-              {currency.format(balance)}
-            </p>
-          </div>
-        </div>
-      </div>
+      <IndicatorCards income={income} expense={expense} balance={balance} />
 
       <TransactionForm onSaved={reload} />
 

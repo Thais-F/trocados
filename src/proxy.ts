@@ -4,7 +4,7 @@ import { authConfig } from "@/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-const PROTECTED_PREFIXES = ["/dashboard", "/categories"];
+const PROTECTED_PREFIXES = ["/dashboard", "/categories", "/resumo"];
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
@@ -19,5 +19,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/categories/:path*"],
+  matcher: ["/dashboard/:path*", "/categories/:path*", "/resumo/:path*"],
 };

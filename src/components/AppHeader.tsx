@@ -7,7 +7,7 @@ export function AppHeader({
   active,
 }: {
   userName?: string | null;
-  active: "dashboard" | "categories";
+  active: "dashboard" | "categories" | "resumo";
 }) {
   return (
     <header className="flex flex-col gap-5">
@@ -58,6 +58,16 @@ export function AppHeader({
           }`}
         >
           Categorias
+        </Link>
+        <Link
+          href="/resumo"
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+            active === "resumo"
+              ? "bg-primary text-white"
+              : "text-muted hover:text-foreground"
+          }`}
+        >
+          Resumo
         </Link>
       </nav>
     </header>
