@@ -22,45 +22,47 @@ export async function GET() {
       month: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
       income: 0,
       expense: 0,
+      categoryTotals: new Map<string, { name: string; color: string; total: number }>(),
     };
   });
 
   let income = 0;
   let expense = 0;
-  const categoryTotals = new Map<string, { name: string; color: string; total: number }>();
 
   for (const t of transactions) {
     const amount = Number(t.amount);
 
+    if (t.type === "INCOME") income += amount;
+    else expense += amount;
+
+    const date = new Date(t.date);
+    const month = months.find((m) => m.key === `${date.getFullYear()}-${date.getMonth()}`);
+    if (!month) continue;
+
     if (t.type === "INCOME") {
-      income += amount;
+      month.income += amount;
     } else {
-      expense += amount;
-      const current = categoryTotals.get(t.categoryId) ?? {
+      month.expense += amount;
+      const current = month.categoryTotals.get(t.categoryId) ?? {
         name: t.category.name,
         color: t.category.color,
         total: 0,
       };
       current.total += amount;
-      categoryTotals.set(t.categoryId, current);
-    }
-
-    const date = new Date(t.date);
-    const month = months.find((m) => m.key === `${date.getFullYear()}-${date.getMonth()}`);
-    if (month) {
-      if (t.type === "INCOME") month.income += amount;
-      else month.expense += amount;
+      month.categoryTotals.set(t.categoryId, current);
     }
   }
 
-  const byCategory = Array.from(categoryTotals.entries())
-    .map(([categoryId, v]) => ({ categoryId, ...v }))
-    .sort((a, b) => b.total - a.total);
-
   const stats: Stats = {
     totals: { income, expense, balance: income - expense },
-    byCategory,
-    byMonth: months.map(({ month, income, expense }) => ({ month, income, expense })),
+    byMonth: months.map(({ month, income, expense, categoryTotals }) => ({
+      month,
+      income,
+      expense,
+      categories: Array.from(categoryTotals.entries())
+        .map(([categoryId, v]) => ({ categoryId, ...v }))
+        .sort((a, b) => b.total - a.total),
+    })),
   };
 
   return NextResponse.json({ stats });

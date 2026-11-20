@@ -13,10 +13,10 @@ export type MonthlyBreakdown = {
   month: string;
   income: number;
   expense: number;
+  categories: CategoryBreakdown[];
 };
 
 export type Stats = {
   totals: { income: number; expense: number; balance: number };
-  byCategory: CategoryBreakdown[];
   byMonth: MonthlyBreakdown[];
 };
