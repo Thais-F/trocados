@@ -4,14 +4,22 @@ import { prisma } from "@/lib/prisma";
 import { transactionSchema } from "@/lib/validation";
 import { isForeignKeyError } from "@/lib/prisma-errors";
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
+  const { searchParams } = new URL(req.url);
+  const now = new Date();
+  const year = Number(searchParams.get("year") ?? now.getFullYear());
+  const month = Number(searchParams.get("month") ?? now.getMonth());
+
+  const start = new Date(year, month, 1);
+  const end = new Date(year, month + 1, 1);
+
   const transactions = await prisma.transaction.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, date: { gte: start, lt: end } },
     include: { category: true },
     orderBy: { date: "desc" },
   });

@@ -26,14 +26,8 @@ export async function GET() {
     };
   });
 
-  let income = 0;
-  let expense = 0;
-
   for (const t of transactions) {
     const amount = Number(t.amount);
-
-    if (t.type === "INCOME") income += amount;
-    else expense += amount;
 
     const date = new Date(t.date);
     const month = months.find((m) => m.key === `${date.getFullYear()}-${date.getMonth()}`);
@@ -54,7 +48,6 @@ export async function GET() {
   }
 
   const stats: Stats = {
-    totals: { income, expense, balance: income - expense },
     byMonth: months.map(({ month, income, expense, categoryTotals }) => ({
       month,
       income,

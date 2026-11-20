@@ -17,6 +17,5 @@ export type MonthlyBreakdown = {
 };
 
 export type Stats = {
-  totals: { income: number; expense: number; balance: number };
   byMonth: MonthlyBreakdown[];
 };

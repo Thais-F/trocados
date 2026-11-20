@@ -24,28 +24,31 @@ export function DashboardPanel() {
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <IndicatorCards {...stats.totals} />
+      <div className="flex gap-1 rounded-lg border border-border bg-surface p-1">
+        {stats.byMonth.map((m, i) => (
+          <button
+            key={`${m.month}-${i}`}
+            type="button"
+            onClick={() => setSelectedMonth(i)}
+            className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize transition ${
+              i === selectedMonth
+                ? "bg-primary text-white"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            {m.month}
+          </button>
+        ))}
+      </div>
+
+      <IndicatorCards
+        income={month.income}
+        expense={month.expense}
+        balance={month.income - month.expense}
+      />
 
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold text-foreground/90">Despesas por categoria</h2>
-          <div className="flex gap-1 rounded-lg border border-border bg-surface p-1">
-            {stats.byMonth.map((m, i) => (
-              <button
-                key={`${m.month}-${i}`}
-                type="button"
-                onClick={() => setSelectedMonth(i)}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize transition ${
-                  i === selectedMonth
-                    ? "bg-primary text-white"
-                    : "text-muted hover:text-foreground"
-                }`}
-              >
-                {m.month}
-              </button>
-            ))}
-          </div>
-        </div>
+        <h2 className="text-sm font-semibold text-foreground/90">Despesas por categoria</h2>
         <CategoryPieChart data={month.categories} />
       </div>
 
